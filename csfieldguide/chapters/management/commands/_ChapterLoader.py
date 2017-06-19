@@ -13,15 +13,17 @@ from chapters.models import Chapter
 class ChapterLoader(BaseLoader):
     """Custom loader for loading chapters."""
 
-    def __init__(self, structure_file_path, chapter, BASE_PATH):
+    def __init__(self, factory, structure_file_path, chapter, BASE_PATH):
         """Create the loader for loading a topic.
 
         Args:
+            factory: LoaderFactory object for creating loaders (LoaderFactory).
             structure_file_path: path to application structure file (str).
-            chapter: key for chapter to load (str)
+            chapter: key for chapter to load (str).
             BASE_PATH: Base file path (str).
         """
         super().__init__(BASE_PATH)
+        self.factory = factory
         self.structure_file_path = structure_file_path
         self.chapter_slug = chapter
         self.BASE_PATH = os.path.join(BASE_PATH, "chapters")
@@ -53,7 +55,14 @@ class ChapterLoader(BaseLoader):
         )
         chapter.save()
 
-        #call interactive loader
+        # call interactive loader
+        interactives = chapter_content.required_files["interactives"]
+        self.factory.create_interactive_loader(
+            self.structure_file_path,
+            interactives,
+            self.BASE_PATH
+        )
+
 
         self.log("Added Chapter: {}".format(chapter.name))
 
